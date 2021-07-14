@@ -57,7 +57,7 @@ defmodule RotationalCipherTest do
     assert RotationalCipher.rotate(plaintext, shift) == "Xiwxmrk 1 2 3 xiwxmrk"
   end
 
- # @tag :pending
+  # @tag :pending
   test "rotate punctuation" do
     plaintext = "Let's eat, Grandma!"
     shift = 21

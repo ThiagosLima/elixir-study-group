@@ -9,21 +9,20 @@ defmodule RotationalCipher do
   @spec rotate(text :: String.t(), shift :: integer) :: String.t()
   def rotate(text, shift) do
     text
-		|> String.to_charlist()
+    |> String.to_charlist()
     |> Enum.map(&calc_value(&1, shift))
     |> List.to_string()
   end
 
   defp rotate_letter(value, shift) when value in ?A..?Z do
-    ?A + rem(value - ?A + shift, 26) 
+    ?A + rem(value - ?A + shift, 26)
   end
 
   defp rotate_letter(value, shift) when value in ?a..?z do
-    ?a + rem(value - ?a + shift, 26) 
+    ?a + rem(value - ?a + shift, 26)
   end
 
   defp rotate_letter(value, _shift) do
     value
   end
-
 end
