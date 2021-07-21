@@ -10,7 +10,7 @@ defmodule RotationalCipher do
   def rotate(text, shift) do
     text
     |> String.to_charlist()
-    |> Enum.map(&calc_value(&1, shift))
+    |> Enum.map(&rotate_letter(&1, shift))
     |> List.to_string()
   end
 
