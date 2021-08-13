@@ -1,4 +1,7 @@
 defmodule PigLatin do
+  @vowels ~w(a e i o u)
+  @vowels_char 'aeiou'
+
   @doc """
   Given a `phrase`, translate it a word at a time to Pig Latin.
 
@@ -13,49 +16,74 @@ defmodule PigLatin do
 
   Some groups are treated like vowels, including "yt" and "xr".
   """
-
-  @vowels ~w(a e i o u)
-  @vowels_char 'aeiou'
-  @spec translate(phrase :: String.t()) :: String.t()
   def translate(phrase) do
     phrase
     |> String.split()
-    |> Enum.map(&func/1)
+    |> Enum.map(&translate_word/1)
     |> Enum.join(" ")
   end
 
-  defp func(phrase) do
-    start =
-      phrase
-      |> String.to_charlist()
-      |> Enum.reduce_while([], fn x, acc ->
-        if x not in @vowels_char or (get_head(acc) == ?q and x == ?u) do
-          if (get_head(acc) == ?y or get_head(acc) == ?x) and x not in @vowels_char do
-            {:halt, Enum.drop(acc, 1)}
-          else
-            {:cont, [x | acc]}
-          end
-        else
-          {:halt, acc}
-        end
-      end)
-      |> Enum.reverse()
-      |> List.to_string()
+  defp translate_word(word) do
+    word
+    |> get_start()
+    |> build_end(word)
+  end
 
-    case String.starts_with?(phrase, @vowels) do
+  defp get_start(word) do
+    word
+    |> String.to_charlist()
+    |> Enum.reduce_while([], &pig_latin_rules/2)
+    |> Enum.reverse()
+    |> List.to_string()
+  end
+
+  defp pig_latin_rules(character, consonants) do
+    cond do
+      are_y_or_x_considered_vowels?(consonants, character) ->
+        {:halt, Enum.drop(consonants, 1)}
+
+      qu_after_consonant?(consonants, character) ->
+        {:cont, [character | consonants]}
+
+      consonant?(character) ->
+        {:cont, [character | consonants]}
+
       true ->
-        phrase <> "ay"
-
-      _ ->
-        String.replace(phrase, start, "") <> start <> "ay"
+        {:halt, consonants}
     end
   end
 
-  defp get_head([]) do
-    []
+  defp are_y_or_x_considered_vowels?(consonants, character) do
+    (last_consonant_is_y?(consonants) or last_consonant_is_x?(consonants)) and
+      consonant?(character)
   end
 
-  defp get_head([head | _]) do
-    head
+  defp last_consonant_is_y?(consonants) do
+    get_last_consonant(consonants) == ?y
+  end
+
+  defp last_consonant_is_x?(consonants) do
+    get_last_consonant(consonants) == ?x
+  end
+
+  defp get_last_consonant([]), do: []
+  defp get_last_consonant([head | _]), do: head
+
+  defp consonant?(character) do
+    character not in @vowels_char
+  end
+
+  defp qu_after_consonant?(consonants, current_character) do
+    get_last_consonant(consonants) == ?q and current_character == ?u
+  end
+
+  defp build_end(start, word) do
+    case String.starts_with?(word, @vowels) do
+      true ->
+        word <> "ay"
+
+      false ->
+        String.replace(word, start, "") <> start <> "ay"
+    end
   end
 end
