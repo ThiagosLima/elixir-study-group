@@ -14,21 +14,48 @@ defmodule PigLatin do
   Some groups are treated like vowels, including "yt" and "xr".
   """
 
-  @vowels ~w(a e i o u y x)
-  @vowels_char 'aeiouyx'
+  @vowels ~w(a e i o u)
+  @vowels_char 'aeiou'
   @spec translate(phrase :: String.t()) :: String.t()
   def translate(phrase) do
-
-  start =
     phrase
-    |> String.to_charlist()
-    |> Enum.take_while(fn x -> x not in @vowels_char end)
-    |> List.to_string()
-    
-     case String.starts_with?(phrase, @vowels) do
-      true -> phrase <> "ay"
-      _ -> 
-        String.replace(phrase, String.length(start), "") <> start <> "ay"
+    |> String.split()
+    |> Enum.map(&func/1)
+    |> Enum.join(" ")
+  end
+
+  defp func(phrase) do
+    start =
+      phrase
+      |> String.to_charlist()
+      |> Enum.reduce_while([], fn x, acc ->
+        if x not in @vowels_char or (get_head(acc) == ?q and x == ?u) do
+          if (get_head(acc) == ?y or get_head(acc) == ?x) and x not in @vowels_char do
+            {:halt, Enum.drop(acc, 1)}
+          else
+            {:cont, [x | acc]}
+          end
+        else
+          {:halt, acc}
+        end
+      end)
+      |> Enum.reverse()
+      |> List.to_string()
+
+    case String.starts_with?(phrase, @vowels) do
+      true ->
+        phrase <> "ay"
+
+      _ ->
+        String.replace(phrase, start, "") <> start <> "ay"
     end
-  end 
+  end
+
+  defp get_head([]) do
+    []
+  end
+
+  defp get_head([head | _]) do
+    head
+  end
 end
