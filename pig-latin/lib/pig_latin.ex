@@ -1,6 +1,5 @@
 defmodule PigLatin do
-  @vowels ~w(a e i o u)
-  @vowels_char 'aeiou'
+  @vowels 'aeiou'
 
   @doc """
   Given a `phrase`, translate it a word at a time to Pig Latin.
@@ -67,23 +66,17 @@ defmodule PigLatin do
   end
 
   defp get_last_consonant([]), do: []
-  defp get_last_consonant([head | _]), do: head
+  defp get_last_consonant([consonant | _]), do: consonant
 
   defp consonant?(character) do
-    character not in @vowels_char
+    character not in @vowels
   end
 
   defp qu_after_consonant?(consonants, current_character) do
     get_last_consonant(consonants) == ?q and current_character == ?u
   end
 
-  defp build_end(start, word) do
-    case String.starts_with?(word, @vowels) do
-      true ->
-        word <> "ay"
+  defp build_end("", word), do: word <> "ay"
 
-      false ->
-        String.replace(word, start, "") <> start <> "ay"
-    end
-  end
+  defp build_end(start, word), do: String.replace(word, start, "", global: false) <> start <> "ay"
 end
